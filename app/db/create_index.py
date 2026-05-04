@@ -29,7 +29,9 @@ async def create_index():
             },
             "mappings": {
                 "properties": {
-                    "text": {"type": "text"},
+                    "text": {
+                        "type": "text"
+                    },
                     "embedding": {
                         "type": "knn_vector",
                         "dimension": 768

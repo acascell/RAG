@@ -16,6 +16,23 @@ Architecture:
 ## Embedding models
 - nomic-embed-text
 
+# Diagram
+query
+  ↓
+embed query
+  ↓
+vector search (OpenSearch kNN)
+  ↓
+BM25 search (OpenSearch text)
+  ↓
+merge results
+  ↓
+rerank (LLM)
+  ↓
+prompt builder
+  ↓
+Ollama generation
+
 # Instructions
 docker compose build --no-cache
 docker compose up
