@@ -38,15 +38,34 @@ docker compose build --no-cache
 docker compose up
 
 ## ingestion
+Ingest three different documents
+
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
   -d '{
-    "text": "A backup failure occurs when data cannot be stored or restored correctly.",
+    "text": "A backup failure occurs when data cannot be written to storage or restored properly.",
     "doc_id": "doc1"
+  }'
+
+curl -X POST http://localhost:8000/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "A database transaction failure happens when ACID properties are violated during commit.",
+    "doc_id": "doc2"
+  }'
+
+curl -X POST http://localhost:8000/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Ollama is a local runtime for running large language models like Qwen and Mistral.",
+    "doc_id": "doc3"
   }'
 
 
 ## retrieval
-curl -X POST http://localhost:8000/ask \   
+Use semantic query for retrieval process
+curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
-  -d '{"question": "What is a backup failure?", "model": "qwen2.5"}'
+  -d '{
+    "question": "What happens when a backup fails?"
+  }'
