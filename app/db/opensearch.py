@@ -1,7 +1,7 @@
-from opensearchpy import OpenSearch
+from opensearchpy import AsyncOpenSearch
 from app.core.config import settings
 
-client = OpenSearch(
+client = AsyncOpenSearch(
     hosts=[{'host': settings.OPENSEARCH_HOST, 'port': settings.OPENSEARCH_PORT}],
 )
 

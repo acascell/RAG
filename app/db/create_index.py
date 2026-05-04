@@ -1,48 +1,29 @@
 from app.db.opensearch import client
 from app.core.config import settings
 
-mapping = {
-    "settings": {
-        "index": {
-            "knn": True
-        }
-    },
-    "mappings": {
-        "properties": {
 
-            "content": {
-                "type": "text"
-            },
+async def create_index():
+    exists = await client.indices.exists(settings.INDEX_NAME)
+    if exists:
+        return
 
-            "embedding": {
-                "type": "knn_vector",
-                "dimension": 1536
-            },
-
-            "source": {
-                "type": "keyword"
-            },
-
-            "customer_id": {
-                "type": "keyword"
-            },
-
-            "document_type": {
-                "type": "keyword"
-            },
-
-            "timestamp": {
-                "type": "date"
-            }
-        }
-    }
-}
-
-if not client.indices.exists(settings.INDEX_NAME):
-
-    client.indices.create(
+    await client.indices.create(
         index=settings.INDEX_NAME,
-        body=mapping
+        body={
+            "settings": {
+                "index": {
+                    "knn": True
+                }
+            },
+            "mappings": {
+                "properties": {
+                    "text": {"type": "text"},
+                    "embedding": {
+                        "type": "knn_vector",
+                        "dimension": 768
+                    },
+                    "metadata": {"type": "object"}
+                }
+            },
+        },
     )
-
-    print("Index created")
