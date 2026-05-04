@@ -16,6 +16,7 @@ Documents:
 """
 
 async def rerank(question: str, docs: list[str]):
+    """Define a quality sorting functionality"""
     formatted_docs = "\n".join(
         [f"[{i}] {doc}" for i, doc in enumerate(docs)]
     )
