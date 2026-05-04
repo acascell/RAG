@@ -2,6 +2,7 @@ from app.db.opensearch import client
 from app.core.config import settings
 
 async def vector_search(query_vector: str, k=5):
+    """ Define a vector search using semantic match"""
     response = await client.search(
         index=settings.INDEX_NAME,
         body={
@@ -21,6 +22,7 @@ async def vector_search(query_vector: str, k=5):
 
 
 async def bm25_search(query: str, k=5):
+    """Use keyword precision with BM25"""
     res = await client.search(
         index=settings.INDEX_NAME,
         body={
@@ -44,7 +46,7 @@ async def bm25_search(query: str, k=5):
 
 def fuse_results(vector_results, bm25_results):
     """
-    Simple rank fusion (RRF-like but simplified)
+    Simple rank fusion (RRF-like but simplified) - balanced retrieval
     """
 
     scores = {}
