@@ -14,7 +14,7 @@ class RagService:
 
         # 2 retrieve
         vector_hits = await vector_search(query_vector)
-        bm25_hits = await bm25_search(query_vector)
+        bm25_hits = await bm25_search(question)
 
         # 3 fuse results
         merged = fuse_results(vector_hits, bm25_hits)
