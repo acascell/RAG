@@ -7,8 +7,9 @@ dependencies = [
     "fastapi>=0.136.1",
     "httpx>=0.28.1",
     "numpy>=2.4.4",
-    "opensearch-py>=3.2.0",
+    "opensearch-py[async]>=3.2.0",
     "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
     "pypdf>=6.10.2",
     "uvicorn>=0.46.0",
 ]
