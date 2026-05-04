@@ -1,9 +1,21 @@
+import asyncio
+from opensearchpy.exceptions import ConnectionError as OSConnectionError
 from app.db.opensearch import client
 from app.core.config import settings
 
 
 async def create_index():
-    exists = await client.indices.exists(settings.INDEX_NAME)
+    for attempt in range(10):
+        try:
+            exists = await client.indices.exists(index=settings.INDEX_NAME)
+            break
+        except (OSConnectionError, ConnectionError):
+            if attempt == 9:
+                raise
+            await asyncio.sleep(2)
+    else:
+        return
+
     if exists:
         return
 
