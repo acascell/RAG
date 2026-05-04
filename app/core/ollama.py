@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 from app.core.config import settings
 
 class OllamaClient:
@@ -19,18 +20,25 @@ class OllamaClient:
             return data["embeddings"][0]
 
     @staticmethod
-    async def generate(prompt: str, model: str = settings.OLLAMA_GENERATION_MODEL):
+    async def generate(prompt: str, model: str = settings.OLLAMA_GENERATION_MODEL, retries: int = 3):
         async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                f"{settings.OLLAMA_URL}/api/generate",
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": False
-                }
+            for attempt in range(retries):
+                response = await client.post(
+                    f"{settings.OLLAMA_URL}/api/generate",
+                    json={
+                        "model": model,
+                        "prompt": prompt,
+                        "stream": False
+                    }
+                )
+                if response.status_code == 200:
+                    return response.json()["response"]
+                if attempt < retries - 1:
+                    print(f"Ollama generate attempt {attempt + 1} failed ({response.status_code}): {response.text}. Retrying...")
+                    await asyncio.sleep(2)
+            raise RuntimeError(
+                f"Ollama generate failed after {retries} attempts ({response.status_code}): {response.text}"
             )
-            response.raise_for_status()
-            return response.json()["response"]
 
 ollama_client = OllamaClient()
 
