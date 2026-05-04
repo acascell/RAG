@@ -15,3 +15,21 @@ Architecture:
 
 ## Embedding models
 - nomic-embed-text
+
+# Instructions
+docker compose build --no-cache
+docker compose up
+
+## ingestion
+curl -X POST http://localhost:8000/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "A backup failure occurs when data cannot be stored or restored correctly.",
+    "doc_id": "doc1"
+  }'
+
+
+## retrieval
+curl -X POST http://localhost:8000/ask \   
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is a backup failure?", "model": "qwen2.5"}'
