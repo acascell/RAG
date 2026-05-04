@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     OLLAMA_GENERATION_MODEL: str = "qwen2.5"
     OPENSEARCH_URL: str = "http://opensearch:9200"
     INDEX_NAME: str = "rag-index"
+    CHUNK_SIZE: int = 500
 
 
 settings = Settings()
