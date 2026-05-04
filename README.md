@@ -10,7 +10,7 @@ Architecture:
 - Small/Fast
   - qwen 2.5
 
-- Better reasoning
+- Ranking
   - mistral-small
 
 ## Embedding models
@@ -34,11 +34,11 @@ prompt builder
 Ollama generation
 
 # Instructions
-docker compose build --no-cache
-docker compose up
+- docker compose build --no-cache
+- docker compose up
 
 ## ingestion
-Ingest three different documents
+Ingest three different documents to test the multiple cases
 
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
@@ -63,9 +63,31 @@ curl -X POST http://localhost:8000/ingest \
 
 
 ## retrieval
+## Test 1
 Use semantic query for retrieval process
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{
     "question": "What happens when a backup fails?"
+  }'
+### expected behavior
+A backup failure occurs when data cannot be written or restored properly.
+
+## Test 2
+test keyword-heavy
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "ACID transaction commit failure database"
+  }'
+
+### expected behavior
+database transaction failure ... ACID ...
+
+## Test 3
+Semantic + noisy query
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Why does my system not save data correctly when something breaks?"
   }'
