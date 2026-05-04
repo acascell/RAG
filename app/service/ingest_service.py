@@ -4,7 +4,7 @@ from app.db.opensearch import client
 from app.core.config import settings
 
 async def ingest(text: str, doc_id: str):
-    """perform ingestion in chunks and store each chunk as a documen t in the opensearch index"""
+    """perform ingestion in chunks and store each chunk as a document in the opensearch index"""
 
     chunks = chunk_text(text, settings.CHUNK_SIZE)
     for i, chunk in enumerate(chunks):

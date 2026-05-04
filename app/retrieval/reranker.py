@@ -1,4 +1,5 @@
 from app.core.ollama import ollama_client
+from app.core.config import settings
 import json
 
 RERANK_PROMPT = """
@@ -28,7 +29,7 @@ async def rerank(question: str, docs: list[str]):
 
     response = await ollama_client.generate(
         prompt,
-        model="mistral-small"
+        model=settings.OLLAMA_RERANKING_MODEL
     )
 
     try:
