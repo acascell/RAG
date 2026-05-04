@@ -23,6 +23,12 @@ services:
     volumes:
       - opensearch_data:/usr/share/opensearch/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
 
   dashboards:
     image: opensearchproject/opensearch-dashboards:2.14.0
@@ -44,7 +50,7 @@ services:
       - "11434:11434"
 
     volumes:
-      - ollama_data:/root/.ollama
+      - ~/.ollama:/root/.ollama
 
     restart: unless-stopped
 
@@ -57,13 +63,14 @@ services:
 
     environment:
       - OLLAMA_HOST=http://ollama:11434
-      - OPENSEARCH_HOST=http://opensearch:9200
+      - OPENSEARCH_URL=http://opensearch:9200
 
     depends_on:
-      - opensearch
-      - ollama
+      opensearch:
+        condition: service_healthy
+      ollama:
+        condition: service_started
 
 
 volumes:
-  ollama_data:
   opensearch_data:
