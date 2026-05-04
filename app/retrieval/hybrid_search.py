@@ -18,7 +18,13 @@ async def vector_search(query_vector: str, k=5):
         },
     )
 
-    return [hit["_source"]["text"] for hit in response["hits"]["hits"]]
+    return [
+        {
+            "text": hit["_source"]["text"],
+            "score": hit["_score"]
+        }
+        for hit in response["hits"]["hits"]
+    ]
 
 
 async def bm25_search(query: str, k=5):

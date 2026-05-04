@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.ingestion.ingest_service import ingest
-from app.retrieval.rag_service import rag
+from app.service.ingest_service import ingest
+from app.service.rag_service import rag
 from app.models.models import AskRequest, IngestRequest
 
 router = APIRouter()
