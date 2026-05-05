@@ -1,24 +1,45 @@
+import asyncio
+from app.core.ollama import ollama_client
 from app.ingestion.chunking import chunk_text
-from app.ingestion.embeddings import embed
 from app.db.opensearch import client
 from app.core.config import settings
 
+BATCH_SIZE = 8
+
+
+async def embed_batch(chunks: list[str]):
+    tasks = [ollama_client.embed(c) for c in chunks]
+    return await asyncio.gather(*tasks)
+
+
+async def bulk_index(docs):
+    body = []
+
+    for doc in docs:
+        body.append({"index": {"_index": settings.INDEX_NAME}})
+        body.append(doc)
+
+    await client.bulk(body=body)
+
+
 async def ingest(text: str, doc_id: str):
-    """perform ingestion in chunks and store each chunk as a document in the opensearch index"""
+    chunks = chunk_text(text)
 
-    chunks = chunk_text(text, settings.CHUNK_SIZE)
-    for i, chunk in enumerate(chunks):
-        vector = await embed(chunk)
+    for i in range(0, len(chunks), BATCH_SIZE):
+        batch = chunks[i:i + BATCH_SIZE]
 
-        await client.index(
-            index=settings.INDEX_NAME,
-            id=f"{doc_id}_{i}",
-            body={
+        embeddings = await embed_batch(batch)
+
+        docs = [
+            {
                 "text": chunk,
-                "embedding": vector,
+                "embedding": emb,
                 "metadata": {
                     "doc_id": doc_id,
-                    "chunk_id": i
+                    "chunk": i + j
                 }
             }
-        )
+            for j, (chunk, emb) in enumerate(zip(batch, embeddings))
+        ]
+
+        await bulk_index(docs)
