@@ -3,8 +3,7 @@ import asyncio
 from app.core.config import settings
 
 class OllamaClient:
-    @staticmethod
-    async def embed(text: str):
+    async def embed(self, text: str):
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 f"{settings.OLLAMA_URL}/api/embed",
@@ -19,8 +18,7 @@ class OllamaClient:
                 raise RuntimeError(f"Ollama embedding response missing 'embeddings' key: {data}")
             return data["embeddings"][0]
 
-    @staticmethod
-    async def generate(prompt: str, model: str = settings.OLLAMA_GENERATION_MODEL, retries: int = 3):
+    async def generate(self, prompt: str, model: str = settings.OLLAMA_GENERATION_MODEL, retries: int = 3):
         async with httpx.AsyncClient(timeout=120.0) as client:
             for attempt in range(retries):
                 response = await client.post(
@@ -39,6 +37,22 @@ class OllamaClient:
             raise RuntimeError(
                 f"Ollama generate failed after {retries} attempts ({response.status_code}): {response.text}"
             )
+
+    async def stream_generate(self, prompt: str, model="qwen2.5"):
+        async with httpx.AsyncClient(timeout=None) as client:
+            async with client.stream(
+                    "POST",
+                    f"{settings.OLLAMA_URL}/api/generate",
+                    json={
+                        "model": model,
+                        "prompt": prompt,
+                        "stream": True,
+                    },
+            ) as r:
+
+                async for line in r.aiter_lines():
+                    if line:
+                        yield line
 
 ollama_client = OllamaClient()
 

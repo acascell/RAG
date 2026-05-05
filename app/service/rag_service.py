@@ -1,3 +1,5 @@
+import asyncio
+
 from app.core.config import settings
 from app.core.ollama import ollama_client
 from app.ingestion.embeddings import embed
@@ -32,5 +34,19 @@ class RagService:
             "answer": answer,
             "contexts": reranked
         }
+
+    @staticmethod
+    async def ask_stream(question: str, model: str = settings.OLLAMA_GENERATION_MODEL):
+        query_vector = await embed(question)
+
+        v, b = await asyncio.gather(vector_search(query_vector), bm25_search(question))
+
+        merged = fuse_results(v, b)
+
+        # Skip reranker for streaming to reduce time-to-first-token
+        prompt = build_prompt(question, merged)
+
+        async for chunk in ollama_client.stream_generate(prompt, model=model):
+            yield chunk
 
 rag = RagService()
