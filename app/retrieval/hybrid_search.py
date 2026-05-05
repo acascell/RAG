@@ -1,34 +1,33 @@
 from app.db.opensearch import client
 from app.core.config import settings
 
-async def vector_search(query_vector: str, k=5):
-    """ Define a vector search using semantic match"""
-    response = await client.search(
+
+async def vector_search(vector, k=10):
+    res = await client.search(
         index=settings.INDEX_NAME,
         body={
             "size": k,
             "query": {
                 "knn": {
                     "embedding": {
-                        "vector": query_vector,
+                        "vector": vector,
                         "k": k
                     }
                 }
-            },
-        },
+            }
+        }
     )
 
     return [
         {
-            "text": hit["_source"]["text"],
-            "score": hit["_score"]
+            "text": h["_source"]["text"],
+            "score": h["_score"]
         }
-        for hit in response["hits"]["hits"]
+        for h in res["hits"]["hits"]
     ]
 
 
-async def bm25_search(query: str, k=5):
-    """Use keyword precision with BM25"""
+async def bm25_search(query, k=10):
     res = await client.search(
         index=settings.INDEX_NAME,
         body={
@@ -38,39 +37,46 @@ async def bm25_search(query: str, k=5):
                     "text": query
                 }
             }
-        },
+        }
     )
 
     return [
         {
-            "text": hit["_source"]["text"],
-            "score": hit["_score"]
+            "text": h["_source"]["text"],
+            "score": h["_score"]
         }
-        for hit in res["hits"]["hits"]
+        for h in res["hits"]["hits"]
     ]
 
 
-def fuse_results(vector_results, bm25_results):
-    """
-    Simple rank fusion (RRF-like but simplified) - balanced retrieval
-    """
+def normalize(scores):
+    if not scores:
+        return scores
 
-    scores = {}
+    max_s = max(s["score"] for s in scores)
+    min_s = min(s["score"] for s in scores)
 
-    def add(results, weight):
-        for i, r in enumerate(results):
-            key = r["text"]
+    for s in scores:
+        if max_s - min_s == 0:
+            s["norm"] = 1
+        else:
+            s["norm"] = (s["score"] - min_s) / (max_s - min_s)
 
-            rank_score = 1 / (i + 1)
+    return scores
 
-            if key not in scores:
-                scores[key] = 0
 
-            scores[key] += weight * rank_score
+def fuse_results(vector_hits, bm25_hits):
+    vector_hits = normalize(vector_hits)
+    bm25_hits = normalize(bm25_hits)
 
-    add(vector_results, 0.7)
-    add(bm25_results, 0.3)
+    combined = {}
 
-    sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    for v in vector_hits:
+        combined[v["text"]] = 0.7 * v["norm"]
 
-    return [item[0] for item in sorted_items[:5]]
+    for b in bm25_hits:
+        combined[b["text"]] = combined.get(b["text"], 0) + 0.3 * b["norm"]
+
+    sorted_docs = sorted(combined.items(), key=lambda x: x[1], reverse=True)
+
+    return [doc for doc, _ in sorted_docs[:8]]
