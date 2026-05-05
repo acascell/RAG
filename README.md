@@ -17,21 +17,21 @@ Architecture:
 - nomic-embed-text
 
 # Diagram
-query
-  ↓
-embed query
-  ↓
-vector search (OpenSearch kNN)
-  ↓
-BM25 search (OpenSearch text)
-  ↓
-merge results
-  ↓
-rerank (LLM)
-  ↓
-prompt builder
-  ↓
-Ollama generation
+- User Question
+   ↓
+- Memory (last N messages)
+   ↓
+- Query Rewriter (LLM)
+   ↓
+- Embedding
+   ↓
+- Hybrid Retrieval
+   ↓
+- Reranker
+   ↓
+- Prompt (with context + history)
+   ↓
+- Streaming Answer
 
 # Instructions
 - docker compose build --no-cache

@@ -5,47 +5,37 @@ from app.core.ollama import ollama_client
 from app.ingestion.embeddings import embed
 from app.retrieval.hybrid_search import vector_search, bm25_search, fuse_results
 from app.retrieval.prompt import build_prompt
+from app.retrieval.query_rewriter import rewrite_query
 from app.retrieval.reranker import rerank
+from app.service.memory import memory
 
 
 class RagService:
-    @staticmethod
-    async def ask(question: str, model: str = settings.OLLAMA_GENERATION_MODEL):
-        # 1 embed query
-        query_vector = await embed(question)
+    async def ask(self, session_id: str, question: str, model: str = settings.OLLAMA_GENERATION_MODEL):
+        # retrieve memory
+        history = memory.get(session_id)
 
-        # 2 retrieve
-        vector_hits = await vector_search(query_vector)
-        bm25_hits = await bm25_search(question)
+        # rewrite query passing history
+        rewritten = await rewrite_query(question, history)
+
+        # 1 embed query
+        query_vector = await embed(rewritten)
+
+        # 2 retrieve (parallel)
+        v, b = await asyncio.gather(vector_search(query_vector), bm25_search(rewritten))
 
         # 3 fuse results
-        merged = fuse_results(vector_hits, bm25_hits)
-
-        # 4 rerank
-        reranked = await rerank(question, merged)
-
-        # 5 prompt
-        prompt = build_prompt(question, reranked)
-
-        # 6 generate
-        answer = await ollama_client.generate(prompt, model=model)
-
-        return {
-            "answer": answer,
-            "contexts": reranked
-        }
-
-    @staticmethod
-    async def ask_stream(question: str, model: str = settings.OLLAMA_GENERATION_MODEL):
-        query_vector = await embed(question)
-
-        v, b = await asyncio.gather(vector_search(query_vector), bm25_search(question))
-
         merged = fuse_results(v, b)
 
-        # Skip reranker for streaming to reduce time-to-first-token
-        prompt = build_prompt(question, merged)
+        # reranked = await rerank(rewritten, merged)
 
+        # 4 prompt
+        prompt = build_prompt(rewritten, merged, history)
+
+        # update memory
+        memory.add(session_id, "user", question)
+
+        # 5 stream generate
         async for chunk in ollama_client.stream_generate(prompt, model=model):
             yield chunk
 
