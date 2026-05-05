@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     OLLAMA_RERANKING_MODEL: str = "qwen2.5"
     OPENSEARCH_URL: str = "http://opensearch:9200"
     INDEX_NAME: str = "rag-index"
+    OPEN_SEARCH_MEMORY_INDEX: str = "memory-index"
     CHUNK_SIZE: int = 500
 
 

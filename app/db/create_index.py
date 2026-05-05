@@ -4,6 +4,32 @@ from app.db.opensearch import client
 from app.core.config import settings
 
 
+async def create_memory_index():
+    exists = await client.indices.exists(index=settings.OPEN_SEARCH_MEMORY_INDEX)
+    if exists:
+        return
+
+    await client.indices.create(
+        index=settings.OPEN_SEARCH_MEMORY_INDEX,
+        body={
+            "settings": {
+                "index": {
+                    "knn": True
+                }
+            },
+            "mappings": {
+                "properties": {
+                    "text": {"type": "text"},
+                    "embedding": {
+                        "type": "knn_vector",
+                        "dimension": 768
+                    },
+                    "session_id": {"type": "keyword"}
+                }
+            },
+        },
+    )
+
 async def create_index():
     for attempt in range(10):
         try:

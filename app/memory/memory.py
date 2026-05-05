@@ -11,4 +11,4 @@ class MemoryStore:
         return list(self.store[session_id])
 
 
-memory = MemoryStore()
+short_term_memory = MemoryStore()
