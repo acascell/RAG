@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class AskRequest(BaseModel):
+class ChatRequest(BaseModel):
+    session_id: str
     question: str
     model: Optional[str] = None
 
