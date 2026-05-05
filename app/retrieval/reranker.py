@@ -1,6 +1,4 @@
 from app.core.ollama import ollama_client
-from app.core.config import settings
-import json
 
 RERANK_PROMPT = """
 You are a ranking system.
@@ -17,24 +15,24 @@ Documents:
 """
 
 async def rerank(question: str, docs: list[str]):
-    """Define a quality sorting functionality"""
-    formatted_docs = "\n".join(
-        [f"[{i}] {doc}" for i, doc in enumerate(docs)]
-    )
+    docs_str = "\n".join([f"{i}. {d}" for i, d in enumerate(docs)])
 
-    prompt = RERANK_PROMPT.format(
-        question=question,
-        docs=formatted_docs
-    )
+    prompt = f"""
+        Rank the following documents by relevance to the question.
+        
+        Return ONLY a list of numbers.
+        
+        Question:
+        {question}
+        
+        Documents:
+        {docs_str}
+        """
 
-    response = await ollama_client.generate(
-        prompt,
-        model=settings.OLLAMA_RERANKING_MODEL
-    )
+    res = await ollama_client.generate(prompt, model="mistral")
 
     try:
-        order = json.loads(response)
+        order = [int(x) for x in res.strip().split() if x.isdigit()]
         return [docs[i] for i in order if i < len(docs)]
     except:
-        # fallback if model fails formatting
         return docs
