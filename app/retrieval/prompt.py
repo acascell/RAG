@@ -15,16 +15,21 @@ def build_prompt(question: str, contexts: list[str], history: list[dict]):
     ctx = "\n\n".join(contexts)
 
     return f"""
-    You are a precise assistant.
+    You are a precise assistant that answers questions based strictly on the provided context.
+
+    RULES:
+    - Use ONLY facts explicitly stated in the Context below.
+    - Do NOT add any information from your own knowledge.
+    - Keep your answer short and directly quote or paraphrase the Context.
+    - If the Context does not contain the answer, respond with: "I don't have enough information to answer this question."
     
-    Conversation:
+    Conversation History:
     {history_text}
     
-    Context: 
+    Context:
     {ctx}
-
+    
     Question:
     {question}
-
-    Answer clearly and concisely.
-    """
+    
+    Answer:"""

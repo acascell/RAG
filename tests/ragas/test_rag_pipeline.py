@@ -57,7 +57,7 @@ async def test_rag_pipeline():
     )
 
     llm = llm_factory(
-        model=settings.OLLAMA_EVAL_MODEL,
+        model=settings.OLLAMA_GENERATION_MODEL,
         client=client,
     )
 
