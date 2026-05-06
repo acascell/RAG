@@ -1,0 +1,16 @@
+[
+  {
+    "question": "What is a backup failure?",
+    "ground_truth": "A backup failure occurs when a backup process does not complete successfully.",
+    "contexts": [
+      "A backup failure happens when a backup job does not complete successfully due to errors."
+    ]
+  },
+  {
+    "question": "When do my backups run?",
+    "ground_truth": "Backups run every night at 2 AM",
+    "contexts": [
+      "Backups run every night at 2 AM"
+    ]
+  }
+]
