@@ -1,93 +1,132 @@
-# RAG
-rag implementation retrieval ingestion
+# RAG Service
 
-Architecture:
+Reference implementation of a Retrieval-Augmented Generation (RAG) pipeline supporting ingestion, hybrid retrieval, reranking, and streaming responses.
 
-## LLM Runtime
-- ollama 
+---
 
-## Chat models
-- Small/Fast
-  - qwen 2.5
+## Architecture Overview
 
-- Ranking
-  - mistral-small
+### LLM Runtime
+- **Ollama** (local model serving)
 
-## Embedding models
-- nomic-embed-text
+### Models
 
-# Diagram
-- User Question
-   ↓
-- Memory (last N messages)
-   ↓
-- Query Rewriter (LLM)
-   ↓
-- Embedding
-   ↓
-- Hybrid Retrieval
-   ↓
-- Reranker
-   ↓
-- Prompt (with context + history)
-   ↓
-- Streaming Answer
+#### Chat Models
+- **Fast / Low-latency**
+  - `qwen2.5`
+  - `qwen2.5:0.5b`
 
-# Instructions
-- docker compose build --no-cache
-- docker compose up
+#### Reranker
+- `mistral-small`
 
-## ingestion
-Ingest three different documents to test the multiple cases
+#### Embeddings
+- `nomic-embed-text`
 
+---
+
+## Pipeline Flow
+![architecture.png](architecture.png)
+---
+
+## Prerequisites
+
+Ensure the following are installed:
+
+- Docker & Docker Compose
+- Ollama
+
+Pull required models:
+
+```bash
+ollama pull qwen2.5
+ollama pull qwen2.5:0.5b
+ollama pull nomic-embed-text
+```
+
+# Running the Service
+## Build and start the stack:
+```bash
+docker compose build --no-cache
+docker compose up
+```
+The API will be available at:
+http://localhost:8000
+
+# API Usage
+## 1. Ingestion
+
+Ingest sample documents to populate the retrieval index.
+```bash
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
   -d '{
     "text": "A backup failure occurs when data cannot be written to storage or restored properly.",
     "doc_id": "doc1"
   }'
+```
 
+```bash
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
   -d '{
     "text": "A database transaction failure happens when ACID properties are violated during commit.",
     "doc_id": "doc2"
   }'
-
+```
+```bash
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
   -d '{
     "text": "Ollama is a local runtime for running large language models like Qwen and Mistral.",
     "doc_id": "doc3"
   }'
+```
+# Retrieval / Question Answering
+## Test 1 — Semantic Query
 
-
-## retrieval
-## Test 1
-Use semantic query for retrieval process
+```bash
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{
     "question": "What happens when a backup fails?"
   }'
-### expected behavior
-A backup failure occurs when data cannot be written or restored properly.
+```
+## Expected behavior:
+- Retrieves semantically similar content
+- Returns explanation of backup failure
 
-## Test 2
-test keyword-heavy
+
+## Test 2 — Keyword-heavy Query
+
+```bash
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{
     "question": "ACID transaction commit failure database"
   }'
+```
 
-### expected behavior
-database transaction failure ... ACID ...
+## Expected behavior:
+- Keyword matching is effective
+- Relevant document about ACID violations is retrieved
 
-## Test 3
-Semantic + noisy query
+
+## Test 3 — Noisy / Indirect Query
+
+```bash
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "Why does my system not save data correctly when something breaks?"
+    "question": "Why does my system fail to save data when something breaks?"
   }'
+```
+
+## Expected behavior:
+- Query rewriting improves retrieval
+- Correct document is retrieved despite vague phrasing
+
+
+# Testing
+## Evaluation Frameworks
+- Ragas — retrieval and answer quality evaluation
+- DeepEval — behavioral and LLM evaluation
