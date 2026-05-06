@@ -5,6 +5,17 @@ from app.core.config import settings
 
 
 async def create_index():
+    """Create the OpenSearch index with KNN vector support if it doesn't already exist.
+
+    Retries the connection up to 10 times (with 2-second delays) to handle
+    cases where OpenSearch is still starting up. The index is configured with:
+    - A 'text' field for BM25 full-text search.
+    - A 'embedding' field (768-dim KNN vector) for semantic search.
+    - A 'metadata' object field for document metadata.
+
+    Raises:
+        ConnectionError: If OpenSearch is unreachable after all retry attempts.
+    """
     for attempt in range(10):
         try:
             exists = await client.indices.exists(index=settings.INDEX_NAME)

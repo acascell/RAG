@@ -8,11 +8,24 @@ BATCH_SIZE = 8
 
 
 async def embed_batch(chunks: list[str]):
+    """Generate embeddings for a batch of text chunks in parallel.
+
+    Args:
+        chunks: List of text strings to embed.
+
+    Returns:
+        A list of embedding vectors (list of floats), one per chunk.
+    """
     tasks = [ollama_client.embed(c) for c in chunks]
     return await asyncio.gather(*tasks)
 
 
 async def bulk_index(docs):
+    """Index multiple documents into OpenSearch in a single bulk request.
+
+    Args:
+        docs: List of document dicts, each containing 'text', 'embedding', and 'metadata' fields.
+    """
     body = []
 
     for doc in docs:
@@ -23,6 +36,15 @@ async def bulk_index(docs):
 
 
 async def ingest(text: str, doc_id: str):
+    """Ingest a document into the RAG pipeline.
+
+    Splits the text into chunks, generates embeddings in batches, and indexes
+    everything into OpenSearch for later retrieval.
+
+    Args:
+        text: The raw document text to ingest.
+        doc_id: A unique identifier for the document, stored as metadata.
+    """
     chunks = chunk_text(text)
 
     for i in range(0, len(chunks), BATCH_SIZE):

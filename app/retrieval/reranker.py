@@ -15,6 +15,18 @@ Documents:
 """
 
 async def rerank(question: str, docs: list[str]):
+    """Rerank documents by relevance to the question using LLM-based scoring.
+
+    Prompts the LLM to order document indices by relevance. Falls back to
+    the original ordering if the model output cannot be parsed.
+
+    Args:
+        question: The user query to rank documents against.
+        docs: List of document text strings to be reranked.
+
+    Returns:
+        A reordered list of document strings, most relevant first.
+    """
     docs_str = "\n".join([f"{i}. {d}" for i, d in enumerate(docs)])
 
     prompt = f"""

@@ -17,30 +17,11 @@ from app.service.rag_service import rag
 from app.core.config import settings
 
 
-async def run_query_with_context(question: str):
-    """
-    Execute RAG query and return:
-    - final answer
-    - retrieved contexts (actual, from pipeline)
-    """
-
+async def run_query(question: str) -> str:
     chunks = []
-    retrieved_contexts = []
-
-    async for event in rag.ask_with_trace(
-        session_id="test",
-        question=question,
-    ):
-        # pipeline contract
-        if event["type"] == "context":
-            retrieved_contexts.append(event["content"])
-
-        elif event["type"] == "chunk":
-            chunks.append(event["content"])
-
-    answer = "".join(chunks)
-
-    return answer, retrieved_contexts
+    async for chunk in rag.ask(session_id="test", question=question):
+        chunks.append(chunk)
+    return "".join(chunks)
 
 
 @pytest.mark.asyncio
@@ -54,14 +35,15 @@ async def test_rag_pipeline():
     for item in raw_dataset:
         question = item.get("question") or item.get("user_input")
         reference = item.get("ground_truth") or item.get("reference")
+        contexts = item.get("contexts") or item.get("retrieved_contexts", [])
 
-        answer, retrieved_contexts = await run_query_with_context(question)
+        answer = await run_query(question)
 
         eval_data.append(
             {
                 "user_input": question,
                 "response": answer,
-                "retrieved_contexts": retrieved_contexts,
+                "retrieved_contexts": contexts,
                 "reference": reference,
             }
         )

@@ -3,6 +3,18 @@ from app.core.ollama import ollama_client
 
 
 async def rewrite_query(question: str, history: list[dict]):
+    """Rewrite the user's question into a standalone query using conversation history.
+
+    Uses the LLM to reformulate ambiguous or context-dependent questions into
+    self-contained queries that can be effectively used for retrieval.
+
+    Args:
+        question: The original user question.
+        history: List of prior conversation turns, each a dict with 'role' and 'content'.
+
+    Returns:
+        A rewritten, standalone query string.
+    """
     history_text = "\n".join([
         f"{msg['role']}: {msg['content']}" for msg in history])
 
