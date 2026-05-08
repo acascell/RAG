@@ -44,7 +44,7 @@ async def test_rag_pipeline():
 
         # Use a unique session ID for each question to avoid state leakage
         session_id = f"test_question_{idx}"
-        answer = await run_query(question, contexts=contexts, session_id=session_id)
+        answer = await run_query(question, session_id=session_id)
 
         print("############# EVAL DEBUG")
         print(f"question: {question}")

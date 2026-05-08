@@ -35,6 +35,6 @@ def build_prompt(question: str, contexts: list[str], history: list[dict]):
     Answer:"""
 
     # Debug: Print the prompt to see what's being sent to the model
-    print(f"\n[DEBUG PROMPT]\nQuestion: {question}\nContext: {ctx}\n[END DEBUG PROMPT]\n")
+    #print(f"\n[DEBUG PROMPT]\nQuestion: {question}\nContext: {ctx}\n[END DEBUG PROMPT]\n")
 
     return prompt
