@@ -14,7 +14,7 @@ def build_prompt(question: str, contexts: list[str], history: list[dict]):
 
     ctx = "\n\n".join(contexts)
 
-    return f"""
+    prompt = f"""
     You are a precise assistant that answers questions based strictly on the provided context.
 
     RULES:
@@ -33,3 +33,8 @@ def build_prompt(question: str, contexts: list[str], history: list[dict]):
     {question}
     
     Answer:"""
+
+    # Debug: Print the prompt to see what's being sent to the model
+    print(f"\n[DEBUG PROMPT]\nQuestion: {question}\nContext: {ctx}\n[END DEBUG PROMPT]\n")
+
+    return prompt

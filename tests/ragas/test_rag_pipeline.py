@@ -17,9 +17,9 @@ from app.service.rag_service import rag
 from app.core.config import settings
 
 
-async def run_query(question: str) -> str:
+async def run_query(question: str, session_id: str = "test") -> str:
     responses = []
-    async for chunk in rag.ask(session_id="test", question=question):
+    async for chunk in rag.ask(session_id=session_id, question=question):
         try:
             data = json.loads(chunk)
             resp = data.get("response", "")
@@ -37,12 +37,14 @@ async def test_rag_pipeline():
 
     eval_data = []
 
-    for item in raw_dataset:
+    for idx, item in enumerate(raw_dataset):
         question = item.get("question") or item.get("user_input")
         reference = item.get("ground_truth") or item.get("reference")
         contexts = item.get("contexts") or item.get("retrieved_contexts", [])
 
-        answer = await run_query(question)
+        # Use a unique session ID for each question to avoid state leakage
+        session_id = f"test_question_{idx}"
+        answer = await run_query(question, contexts=contexts, session_id=session_id)
 
         print("############# EVAL DEBUG")
         print(f"question: {question}")
