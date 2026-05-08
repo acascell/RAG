@@ -18,10 +18,15 @@ from app.core.config import settings
 
 
 async def run_query(question: str) -> str:
-    chunks = []
+    responses = []
     async for chunk in rag.ask(session_id="test", question=question):
-        chunks.append(chunk)
-    return "".join(chunks)
+        try:
+            data = json.loads(chunk)
+            resp = data.get("response", "")
+            responses.append(resp)
+        except Exception as e:
+            print(f"[DEBUG] Failed to parse chunk: {chunk}, error: {e}")
+    return "".join(responses)
 
 
 @pytest.mark.asyncio
@@ -38,6 +43,13 @@ async def test_rag_pipeline():
         contexts = item.get("contexts") or item.get("retrieved_contexts", [])
 
         answer = await run_query(question)
+
+        print("############# EVAL DEBUG")
+        print(f"question: {question}")
+        print(f"reference: {reference}")
+        print(f"context: {contexts}")
+        print(f"answer: {answer}")
+        print("###### END DEBUG")
 
         eval_data.append(
             {

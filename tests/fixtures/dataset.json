@@ -3,14 +3,21 @@
     "question": "What is a backup failure?",
     "ground_truth": "A backup failure occurs when a backup process does not complete successfully.",
     "contexts": [
-      "A backup failure happens when a backup job does not complete successfully due to errors."
+      "A backup failure occurs when data cannot be written to storage or restored properly."
     ]
   },
   {
-    "question": "When do my backups run?",
-    "ground_truth": "Backups run every night at 2 AM",
+    "question": "When a database failure occurs",
+    "ground_truth": "A database transaction failure occurs when ACID properties are violated during the commit process.",
     "contexts": [
-      "Backups run every night at 2 AM"
+      "A database transaction failure happens when ACID properties are violated during commit."
+    ]
+  },
+  {
+    "question": "What is Olama?",
+    "ground_truth": "Ollama is a local runtime used to run large language models such as Qwen and Mistral on a local machine.",
+    "contexts": [
+      "Ollama is a local runtime for running large language models like Qwen and Mistral."
     ]
   }
 ]
