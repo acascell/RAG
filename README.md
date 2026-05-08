@@ -1,6 +1,7 @@
 # RAG Service
 
-Reference implementation of a Retrieval-Augmented Generation (RAG) pipeline supporting ingestion, hybrid retrieval, reranking, and streaming responses.
+Reference implementation of a Retrieval-Augmented Generation (RAG) pipeline supporting ingestion, hybrid retrieval, 
+reranking, and streaming responses.
 
 ---
 
@@ -34,6 +35,7 @@ Ensure the following are installed:
 
 - Docker & Docker Compose
 - Ollama
+- uv install dependencies
 
 Pull required models:
 
@@ -41,7 +43,9 @@ Pull required models:
 ollama pull qwen2.5
 ollama pull qwen2.5:0.5b
 ollama pull nomic-embed-text
+ollama pull mistral-small
 ```
+---
 
 # Running the Service
 ## Build and start the stack:
@@ -49,9 +53,13 @@ ollama pull nomic-embed-text
 docker compose build --no-cache
 docker compose up
 ```
-The API will be available at:
-http://localhost:8000
+The APIs will be available at:
+- chat
+  - http://localhost:8000/ask
+- ingestion
+  - http://localhost:8000/ask
 
+---
 # API Usage
 ## 1. Ingestion
 
@@ -125,6 +133,7 @@ curl -X POST http://localhost:8000/ask \
 - Query rewriting improves retrieval
 - Correct document is retrieved despite vague phrasing
 
+---
 
 # Testing
 ## Evaluation Frameworks
