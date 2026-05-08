@@ -38,9 +38,9 @@ async def test_rag_pipeline():
     eval_data = []
 
     for idx, item in enumerate(raw_dataset):
-        question = item.get("question") or item.get("user_input")
-        reference = item.get("ground_truth") or item.get("reference")
-        contexts = item.get("contexts") or item.get("retrieved_contexts", [])
+        question = item.get("question")
+        reference = item.get("ground_truth")
+        contexts = item.get("contexts")
 
         # Use a unique session ID for each question to avoid state leakage
         session_id = f"test_question_{idx}"

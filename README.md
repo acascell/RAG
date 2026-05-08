@@ -139,3 +139,10 @@ curl -X POST http://localhost:8000/ask \
 ## Evaluation Frameworks
 - Ragas — retrieval and answer quality evaluation
 - DeepEval — behavioral and LLM evaluation
+
+
+## todo
+- enable ranking
+- fix answer accuracy ragas
+- fine deepeval test
+- enable persistent memory using vector
