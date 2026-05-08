@@ -144,5 +144,5 @@ curl -X POST http://localhost:8000/ask \
 ## todo
 - enable ranking
 - fix answer accuracy ragas
-- fine deepeval test
+- update deepeval test
 - enable persistent memory using vector
