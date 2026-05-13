@@ -57,7 +57,7 @@ The APIs will be available at:
 - chat
   - http://localhost:8000/ask
 - ingestion
-  - http://localhost:8000/ask
+  - http://localhost:8000/ingest
 
 ---
 # API Usage
